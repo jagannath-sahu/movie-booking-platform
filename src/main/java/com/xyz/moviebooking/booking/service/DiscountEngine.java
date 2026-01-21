@@ -9,7 +9,6 @@ import java.util.List;
 
 @Service
 public class DiscountEngine {
-
     private final List<DiscountStrategy> strategies;
 
     public DiscountEngine(List<DiscountStrategy> strategies) {

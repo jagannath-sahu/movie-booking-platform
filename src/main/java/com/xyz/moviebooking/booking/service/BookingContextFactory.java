@@ -35,11 +35,6 @@ public class BookingContextFactory {
     public BookingContext create(BookRequest request, UUID bookingId) {
 
         // 1️⃣ Fetch locked seats for pricing
-/*        List<ShowSeatInventory> seats =
-                seatInventoryRepository.findLockedSeatsByBooking(request.getShowId())
-                        .stream()
-                        .filter(s -> request.getSeatIds().contains(s.getSeatNumber()))
-                        .toList();*/
         List<ShowSeatInventory> seats =
                 seatInventoryRepository.findLockedSeatsForBooking(
                         request.getShowId(),
