@@ -1,13 +1,15 @@
 package com.xyz.moviebooking.payment.client;
 
 import com.xyz.moviebooking.payment.domain.PaymentRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Random;
 
 @Component
 public class PaymentGatewayClient {
-
+    private static final Logger log = LoggerFactory.getLogger(PaymentGatewayClient.class);
     private final Random random = new Random();
 
     /**
@@ -29,9 +31,8 @@ public class PaymentGatewayClient {
         }
 
         // success log
-        System.out.println("Payment successful for booking: "
-                + request.getBookingId()
-                + " Amount: " + request.getAmount());
+        log.info("Payment successful for booking: {} and Amount: {}",
+                request.getBookingId(), " Amount: " + request.getAmount());
     }
 }
 

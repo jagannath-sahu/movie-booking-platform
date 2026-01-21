@@ -14,7 +14,7 @@ public class AfternoonShowDiscount implements DiscountStrategy {
                 && ctx.getShowTime().isBefore(LocalTime.of(17, 0));
     }
 
-    public BigDecimal apply(BigDecimal amount) {
+    public BigDecimal apply(BookingContext ctx,BigDecimal amount) {
         return amount.multiply(BigDecimal.valueOf(0.8));
     }
 }

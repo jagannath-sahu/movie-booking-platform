@@ -20,7 +20,7 @@ public class DiscountEngine {
         BigDecimal price = ctx.getBasePrice();
         for (DiscountStrategy strategy : strategies) {
             if (strategy.isApplicable(ctx)) {
-                price = strategy.apply(price);
+                price = strategy.apply(ctx, price);
             }
         }
         return price;

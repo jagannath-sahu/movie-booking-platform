@@ -13,10 +13,6 @@ public class ThirdTicketDiscount implements DiscountStrategy {
     }
 
     @Override
-    public BigDecimal apply(BigDecimal amount) {
-        return null;
-    }
-
     public BigDecimal apply(BookingContext ctx, BigDecimal amount) {
         return amount.subtract(ctx.getThirdTicketPrice().multiply(BigDecimal.valueOf(0.5)));
     }

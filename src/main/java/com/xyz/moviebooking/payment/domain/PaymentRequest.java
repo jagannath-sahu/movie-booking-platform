@@ -1,8 +1,13 @@
 package com.xyz.moviebooking.payment.domain;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.util.UUID;
 
+@Setter
+@Getter
 public class PaymentRequest {
 
     private UUID bookingId;
@@ -23,28 +28,5 @@ public class PaymentRequest {
         this.paymentMethod = paymentMethod;
     }
 
-    public UUID getBookingId() {
-        return bookingId;
-    }
-
-    public void setBookingId(UUID bookingId) {
-        this.bookingId = bookingId;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
 }
 

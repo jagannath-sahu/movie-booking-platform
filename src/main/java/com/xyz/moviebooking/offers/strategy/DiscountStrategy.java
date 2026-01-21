@@ -6,6 +6,6 @@ import java.math.BigDecimal;
 
 public interface DiscountStrategy {
     boolean isApplicable(BookingContext ctx);
-    BigDecimal apply(BigDecimal amount);
+    BigDecimal apply(BookingContext ctx, BigDecimal amount);
 }
 
