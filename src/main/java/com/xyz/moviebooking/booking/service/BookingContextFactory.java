@@ -35,16 +35,21 @@ public class BookingContextFactory {
     public BookingContext create(BookRequest request, UUID bookingId) {
 
         // 1️⃣ Fetch locked seats for pricing
-        List<ShowSeatInventory> seats =
+/*        List<ShowSeatInventory> seats =
                 seatInventoryRepository.findLockedSeatsByBooking(request.getShowId())
                         .stream()
                         .filter(s -> request.getSeatIds().contains(s.getSeatNumber()))
-                        .toList();
+                        .toList();*/
+        List<ShowSeatInventory> seats =
+                seatInventoryRepository.findLockedSeatsForBooking(
+                        request.getShowId(),
+                        request.getSeatIds()
+                );
         log.info("BookingContextFactory seats size : {}", seats.size());
         log.info("BookingContextFactory request seats SeatIds size : {}", request.getSeatIds().size());
 
         if (seats.size() != request.getSeatIds().size()) {
-            throw new IllegalStateException("Seat pricing info missing");
+            throw new IllegalStateException("Some seats are no longer locked");
         }
 
         // 2️⃣ Extract prices (can be dynamic later)

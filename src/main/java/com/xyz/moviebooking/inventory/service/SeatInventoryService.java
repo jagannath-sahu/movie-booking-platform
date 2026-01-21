@@ -1,6 +1,9 @@
 package com.xyz.moviebooking.inventory.service;
 
+import com.xyz.moviebooking.inventory.errors.SeatUnavailableException;
 import com.xyz.moviebooking.inventory.repo.SeatInventoryRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,6 +13,7 @@ import com.xyz.moviebooking.inventory.domain.ShowSeatInventory;
 
 @Service
 public class SeatInventoryService {
+    private static final Logger log = LoggerFactory.getLogger(SeatInventoryService.class);
 
     public final SeatInventoryRepository seatInventoryRepository;
 
@@ -21,8 +25,13 @@ public class SeatInventoryService {
     public void lockSeats(UUID showId, List<String> seatIds) {
         List<ShowSeatInventory> seats = seatInventoryRepository.findAvailableSeatsForUpdate(showId, seatIds);
 
+        for (ShowSeatInventory s : seats) {
+            log.info("Show ID = {}", s.getShow().getId());
+            log.info("Start Time = {}", s.getShow().getStartTime());
+        }
+
         if (seats.size() != seatIds.size()) {
-            throw new RuntimeException("Seat unavailable");
+            throw new SeatUnavailableException("One or more seats are already booked");
         }
 
         seats.forEach(ShowSeatInventory::lock);

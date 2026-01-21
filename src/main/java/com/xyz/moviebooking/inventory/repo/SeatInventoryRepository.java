@@ -44,6 +44,18 @@ public interface SeatInventoryRepository
             @Param("bookingId") UUID bookingId
     );
 
+    @Query("""
+    SELECT s
+    FROM ShowSeatInventory s
+    WHERE s.show.id = :showId
+      AND s.status = 'LOCKED'
+      AND s.seatNumber IN :seatIds
+""")
+    List<ShowSeatInventory> findLockedSeatsForBooking(
+            @Param("showId") UUID showId,
+            @Param("seatIds") List<String> seatIds
+    );
+
     /**
      * Fetches all inventory for a show (for browse/seat map API later).
      */

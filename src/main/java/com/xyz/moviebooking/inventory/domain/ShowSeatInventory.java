@@ -21,6 +21,7 @@ public class ShowSeatInventory {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "show_id", nullable = false)  // ✅ CORRECT
+    @Getter
     private Show show;
 
     @Column(name = "seat_number", nullable = false)
