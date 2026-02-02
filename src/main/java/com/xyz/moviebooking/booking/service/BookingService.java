@@ -1,8 +1,10 @@
 package com.xyz.moviebooking.booking.service;
 
+import com.xyz.moviebooking.booking.domain.Booking;
 import com.xyz.moviebooking.booking.domain.BookingContext;
+import com.xyz.moviebooking.booking.domain.SeatLockRequest;
+import com.xyz.moviebooking.booking.repo.BookingRepository;
 import com.xyz.moviebooking.common.events.Topics;
-import com.xyz.moviebooking.inventory.service.SeatInventoryService;
 import com.xyz.moviebooking.payment.service.PaymentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,24 +16,27 @@ import org.springframework.transaction.annotation.Transactional;
 import com.xyz.moviebooking.payment.domain.PaymentRequest;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Service
 public class BookingService {
     private static final Logger log = LoggerFactory.getLogger(BookingService.class);
-
-    private final SeatInventoryService inventoryService;
+    private final InventoryGatewayService inventoryGatewayService;
     private final PaymentService paymentService;
     private final DiscountEngine discountEngine;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final BookingContextFactory bookingContextFactory;
+    private final BookingRepository bookingRepository;
 
-    public BookingService(SeatInventoryService inventoryService, PaymentService paymentService, DiscountEngine discountEngine, @Qualifier("jsonKafkaTemplate") KafkaTemplate<String, Object> kafkaTemplate, BookingContextFactory bookingContextFactory) {
-        this.inventoryService = inventoryService;
+    public BookingService(InventoryGatewayService inventoryGatewayService, PaymentService paymentService, DiscountEngine discountEngine, @Qualifier("jsonKafkaTemplate") KafkaTemplate<String, Object> kafkaTemplate,
+                          BookingContextFactory bookingContextFactory, BookingRepository bookingRepository) {
+        this.inventoryGatewayService = inventoryGatewayService;
         this.paymentService = paymentService;
         this.discountEngine = discountEngine;
         this.kafkaTemplate = kafkaTemplate;
         this.bookingContextFactory = bookingContextFactory;
+        this.bookingRepository = bookingRepository;
     }
 
     @Transactional
@@ -40,14 +45,15 @@ public class BookingService {
 
         UUID bookingId = UUID.randomUUID();
 
-        inventoryService.lockSeats(req.getShowId(), req.getSeatIds());
+        inventoryGatewayService.lockSeats(SeatLockRequest.builder().showId(req.getShowId())
+                .seatIds(req.getSeatIds()).build());
 
         BookingContext ctx = bookingContextFactory.create(req, bookingId);
 
-        BigDecimal finalPrice = discountEngine.applyDiscounts(ctx);
+        //BigDecimal finalPrice = discountEngine.applyDiscounts(ctx);
 
         try {
-            paymentService.pay(new PaymentRequest(bookingId, finalPrice));
+            paymentService.pay(new PaymentRequest(bookingId, ctx.getBasePrice()));
         } catch (Exception e) {
             kafkaTemplate.send(Topics.PAYMENT_FAILED, bookingId);
             throw e;
@@ -56,6 +62,10 @@ public class BookingService {
         kafkaTemplate.send(Topics.BOOKING_CONFIRMED, bookingId);
         log.info("booking ticket complete");
         return bookingId;
+    }
+
+    public List<Booking> findByShowId(UUID showId){
+        return bookingRepository.findByShowId(showId);
     }
 }
 

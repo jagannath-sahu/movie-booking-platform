@@ -1,29 +1,19 @@
-package com.xyz.moviebooking.catalog.domain;
+package com.xyz.moviebooking.booking.domain;
 
 import jakarta.persistence.*;
 import lombok.Setter;
 
 import java.util.List;
 
-@Entity
-@Table(name = "screen")
 public class Screen {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
     @Setter
-    @Column(name = "name", nullable = false)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "theatre_id", nullable = false)
     private Theatre theatre;
 
-    // Optional: back-reference to shows
-    @OneToMany(mappedBy = "screen", fetch = FetchType.LAZY)
     private List<Show> shows;
 
     protected Screen() {

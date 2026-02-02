@@ -1,9 +1,7 @@
 package com.xyz.moviebooking.booking.service;
 
 import com.xyz.moviebooking.booking.api.BookRequest;
-import com.xyz.moviebooking.booking.domain.BookingContext;
-import com.xyz.moviebooking.inventory.domain.ShowSeatInventory;
-import com.xyz.moviebooking.inventory.repo.SeatInventoryRepository;
+import com.xyz.moviebooking.booking.domain.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -11,56 +9,49 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import com.xyz.moviebooking.catalog.repo.ShowRepository;
+
+import static java.util.stream.Collectors.toSet;
 
 @Component
 public class BookingContextFactory {
 
     private static final Logger log = LoggerFactory.getLogger(BookingContextFactory.class);
-    private final SeatInventoryRepository seatInventoryRepository;
-    private final ShowRepository showRepository; // assumed repo for show timing
-
-    public BookingContextFactory(
-            SeatInventoryRepository seatInventoryRepository, ShowRepository showRepository) {
-        this.seatInventoryRepository = seatInventoryRepository;
-        this.showRepository = showRepository;
+    private final InventoryGatewayService inventoryGatewayService;
+    public BookingContextFactory(InventoryGatewayService inventoryGatewayService) {
+        this.inventoryGatewayService = inventoryGatewayService;
     }
 
     /**
      * Builds BookingContext from request + DB state.
      * This is the single place where pricing & show metadata is assembled.
      */
-    public BookingContext create(BookRequest request, UUID bookingId) {
-
-        // 1️⃣ Fetch locked seats for pricing
-        List<ShowSeatInventory> seats =
-                seatInventoryRepository.findLockedSeatsForBooking(
-                        request.getShowId(),
-                        request.getSeatIds()
-                );
+    public BookingContext create(BookRequest req, UUID bookingId) {
+        // Fetch locked seats for pricing
+        List<SeatInfoDTO> seats = inventoryGatewayService.findLockedSeats(req.getShowId(), req.getSeatIds());
         log.info("BookingContextFactory seats size : {}", seats.size());
-        log.info("BookingContextFactory request seats SeatIds size : {}", request.getSeatIds().size());
+        log.info("BookingContextFactory request seats SeatIds size : {}", req.getSeatIds().size());
 
-        if (seats.size() != request.getSeatIds().size()) {
+/*        if (seats.size() != req.getSeatIds().size()) {
             throw new IllegalStateException("Some seats are no longer locked");
-        }
+        }*/
 
-        // 2️⃣ Extract prices (can be dynamic later)
+
+        // Extract prices (can be dynamic later)
         List<BigDecimal> seatPrices = seats.stream()
-                .map(this::priceForSeat)
+                .map(SeatInfoDTO::price)
                 .collect(Collectors.toList());
 
-        // 3️⃣ Fetch show timing (needed for afternoon discount)
-        LocalTime showTime = showRepository
-                .findStartTimeById(request.getShowId())
-                .orElseThrow(() -> new IllegalStateException("Show not found"));
+        // Fetch show timing (needed for afternoon discount)
+        LocalTime showTime = inventoryGatewayService
+                .fetchStartTime(req.getShowId()).getStartTime();
 
-        // 4️⃣ Build immutable context
+        // Build immutable context
         return new BookingContext(
                 bookingId,
-                request.getShowId(),
+                req.getShowId(),
                 showTime,
                 seatPrices
         );

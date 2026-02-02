@@ -1,4 +1,4 @@
-package com.xyz.moviebooking.inventory.errors;
+package com.xyz.moviebooking.booking.exception;
 
 public class SeatUnavailableException extends RuntimeException {
 
@@ -6,4 +6,3 @@ public class SeatUnavailableException extends RuntimeException {
         super(message);
     }
 }
-

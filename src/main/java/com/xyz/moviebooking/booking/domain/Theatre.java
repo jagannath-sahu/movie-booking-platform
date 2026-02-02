@@ -1,4 +1,4 @@
-package com.xyz.moviebooking.catalog.domain;
+package com.xyz.moviebooking.booking.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -1,6 +1,5 @@
 package com.xyz.moviebooking.booking.exception;
 
-import com.xyz.moviebooking.inventory.errors.SeatUnavailableException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

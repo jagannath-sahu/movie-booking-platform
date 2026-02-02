@@ -1,27 +1,33 @@
+/*
 package com.xyz.moviebooking.common.config;
 
+import com.xyz.moviebooking.booking.domain.Booking;
+import com.xyz.moviebooking.booking.domain.SeatReleaseRequest;
+import com.xyz.moviebooking.booking.repo.BookingRepository;
+import com.xyz.moviebooking.booking.service.InventoryGatewayService;
 import com.xyz.moviebooking.common.events.Topics;
-import com.xyz.moviebooking.inventory.service.SeatInventoryService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.UUID;
 
 @Component
 public class PaymentFailureListener {
+    private final InventoryGatewayService inventoryGatewayService;
+    private final BookingRepository bookingRepository;
 
-    private final SeatInventoryService inventoryService;
-
-    public PaymentFailureListener(SeatInventoryService inventoryService) {
-        this.inventoryService = inventoryService;
+    public PaymentFailureListener(InventoryGatewayService inventoryGatewayService, BookingRepository bookingRepository) {
+        this.inventoryGatewayService = inventoryGatewayService;
+        this.bookingRepository = bookingRepository;
     }
 
-    @KafkaListener(
-            topics = Topics.PAYMENT_FAILED,
-            containerFactory = "jsonKafkaListenerContainerFactory"
-    )
+    @KafkaListener(topics = Topics.PAYMENT_FAILED, containerFactory = "jsonKafkaListenerContainerFactory")
     public void handle(UUID bookingId) {
-        inventoryService.releaseSeats(bookingId);
+        List<Booking> bookings = bookingRepository.findByShowId(bookingId);
+        //SeatReleaseRequest req = loadFromBookingCacheOrDB(bookingId);
+        //inventoryGatewayService.releaseSeats(req);
     }
 }
 
+*/

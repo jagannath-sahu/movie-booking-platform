@@ -1,4 +1,4 @@
-package com.xyz.moviebooking.inventory.domain;
+package com.xyz.moviebooking.booking.domain;
 
 public enum SeatStatus {
 
